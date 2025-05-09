@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat - MindfulAI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="chat-page">
+    <div class="container">
+        <header>
+            <nav class="navbar">
+                <div class="logo">
+                    <img src="{{ url_for('static', filename='images/mental-health-logo.svg') }}" alt="MindfulAI Logo">
+                    <h1>MindfulAI</h1>
+                </div>
+                <div class="hamburger-menu">
+                    <div class="hamburger-icon">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="{{ url_for('index') }}">Home</a></li>
+                    <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <main class="chat-container">
+            <div class="chat-header">
+                <h2>Hello, {{ session.get('username', 'User') }}! Let's Talk</h2>
+                <div class="chat-actions">
+                    <button id="refresh-chat" class="btn-icon" title="New Chat">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="chat-messages" id="chat-messages">
+                <div class="welcome-message">
+                    <h3>Welcome to MindfulAI</h3>
+                    <p>I'm here to support you with your mental health concerns. Please tell me what specific mental health issue you're experiencing today.</p>
+                </div>
+                <!-- Messages will be loaded here dynamically -->
+            </div>
+            
+            <div class="chat-input-container">
+                <form id="chat-form">
+                    <textarea 
+                        id="chat-input" 
+                        placeholder="Share your thoughts or concerns..." 
+                        rows="1"
+                        required
+                    ></textarea>
+                    <button type="submit" class="send-button">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <!-- Typing Indicator Template -->
+    <template id="typing-indicator-template">
+        <div class="message bot-message typing-indicator">
+            <div class="bot-avatar">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div class="message-content">
+                <div class="typing-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- Message Templates -->
+    <template id="user-message-template">
+        <div class="message user-message">
+            <div class="message-content">
+                <p></p>
+            </div>
+        </div>
+    </template>
+
+    <template id="bot-message-template">
+        <div class="message bot-message">
+            <div class="bot-avatar">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div class="message-content">
+                <p></p>
+            </div>
+        </div>
+    </template>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+</body>
+</html>

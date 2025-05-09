@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: mindfulai
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --bind 0.0.0.0:$PORT --workers=1 main:app
+    envVars:
+      - key: postgresql://postgres:[lokesh7345]@db.qjlveevoebvgxfzmsbzj.supabase.co:5432/postgres
+        sync: false
+      - key: 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
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: https://qjlveevoebvgxfzmsbzj.supabase.co
+        sync: false
+      - key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFqbHZlZXZvZWJ2Z3hmem1zYnpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY3NzM4NjYsImV4cCI6MjA2MjM0OTg2Nn0.JU-AU7U7hQQ-ccv2_xkgkcRiARbuor39Dw2ztQbhiC4
+        sync: false

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindfulAI Deployment Guide</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #2980b9;
+            margin-top: 20px;
+        }
+        h3 {
+            color: #3498db;
+        }
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: Consolas, Monaco, 'Andale Mono', monospace;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: Consolas, Monaco, 'Andale Mono', monospace;
+        }
+        ol, ul {
+            margin-left: 20px;
+        }
+        li {
+            margin-bottom: 5px;
+        }
+        .note {
+            background-color: #e7f2fa;
+            border-left: 4px solid #3498db;
+            padding: 10px 15px;
+            margin: 20px 0;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .highlight {
+            background-color: #ffe0b2;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <h1>MindfulAI Deployment Guide</h1>
+    <p>This guide provides step-by-step instructions for deploying your MindfulAI mental health chatbot application using Render for hosting and Supabase for the database.</p>
+
+    <h2>Application Overview</h2>
+    <p>MindfulAI is a mental health chatbot that helps users identify and address the root causes of their mental health issues. The application:</p>
+    <ol>
+        <li>Provides user authentication with secure password hashing</li>
+        <li>Follows a structured conversation flow:
+            <ul>
+                <li>Asks about the specific mental health problem</li>
+                <li>Builds the conversation with targeted questions</li>
+                <li>Identifies the root cause</li>
+                <li>Provides practical solutions to address the root cause</li>
+            </ul>
+        </li>
+        <li>Uses GitHub's LLaMA AI model for generating empathetic, helpful responses</li>
+        <li>Stores only user credentials in the database (conversations remain in memory)</li>
+    </ol>
+
+    <h2>Prerequisites</h2>
+    <p>Before deployment, ensure you have:</p>
+    <ul>
+        <li>A <a href="https://github.com/">GitHub account</a> with a personal access token (GITHUB_TOKEN) with "models:read" permission</li>
+        <li>A <a href="https://supabase.com/">Supabase account</a></li>
+        <li>A <a href="https://render.com/">Render account</a></li>
+    </ul>
+
+    <h2>Step 1: Set Up Supabase Database</h2>
+    <ol>
+        <li>Go to the <a href="https://supabase.com/dashboard/projects">Supabase dashboard</a></li>
+        <li>Click <strong>New Project</strong> and fill in the project details</li>
+        <li>Once created, go to <strong>Project Settings</strong> → <strong>Database</strong></li>
+        <li>Locate the <strong>Connection String</strong> section and copy the <strong>URI</strong> value under "Transaction pooler" (you'll need to replace <code>[YOUR-PASSWORD]</code> with your actual password)</li>
+        <li>Store this URI as it will be used for your DATABASE_URL in Render</li>
+    </ol>
+
+    <h2>Step 2: Create the Required Tables in Supabase</h2>
+    <ol>
+        <li>In your Supabase project, go to the <strong>SQL Editor</strong> tab</li>
+        <li>Create a new query and paste the following SQL:</li>
+    </ol>
+    <pre><code>CREATE TABLE IF NOT EXISTS public.user (
+    id SERIAL PRIMARY KEY,
+    user_id VARCHAR(64) UNIQUE NOT NULL,
+    name VARCHAR(100),
+    email VARCHAR(120) UNIQUE,
+    password VARCHAR(256) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);</code></pre>
+    <ol start="3">
+        <li>Click <strong>Run</strong> to create the table</li>
+    </ol>
+
+    <h2>Step 3: Prepare Your Application for Deployment</h2>
+    <ol>
+        <li>Create a <code>requirements.txt</code> file in your project root containing all dependencies:</li>
+    </ol>
+    <pre><code>email-validator
+flask
+flask-cors
+flask-login
+flask-sqlalchemy
+flask-wtf
+gunicorn
+psycopg2-binary
+requests
+sqlalchemy
+supabase
+werkzeug</code></pre>
+    <ol start="2">
+        <li>Create a <code>render.yaml</code> file in your project root:</li>
+    </ol>
+    <pre><code>services:
+  - type: web
+    name: mindfulai
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --bind 0.0.0.0:$PORT --workers=1 main:app
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: GITHUB_TOKEN
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false</code></pre>
+
+    <h2>Step 4: Deploy to Render</h2>
+    <ol>
+        <li>Push your code to a GitHub repository</li>
+        <li>Log in to your Render account</li>
+        <li>Click <strong>New</strong> and select <strong>Web Service</strong></li>
+        <li>Link your GitHub repository</li>
+        <li>Fill in the service details:
+            <ul>
+                <li><strong>Name</strong>: mindfulai (or your preferred name)</li>
+                <li><strong>Environment</strong>: Python</li>
+                <li><strong>Build Command</strong>: <code>pip install -r requirements.txt</code></li>
+                <li><strong>Start Command</strong>: <code>gunicorn --bind 0.0.0.0:$PORT --workers=1 main:app</code></li>
+            </ul>
+        </li>
+        <li>Add the following environment variables:
+            <ul>
+                <li><code>DATABASE_URL</code>: Your Supabase PostgreSQL connection string (format: <code>postgresql://postgres:YOUR_PASSWORD@db.YOUR_PROJECT_ID.supabase.co:5432/postgres</code>)</li>
+                <li><code>GITHUB_TOKEN</code>: Your GitHub personal access token with "models:read" permission</li>
+                <li><code>SESSION_SECRET</code>: A strong random string for session security</li>
+            </ul>
+        </li>
+        <li>Click <strong>Create Web Service</strong></li>
+    </ol>
+    <p>Render will automatically build and deploy your application. The service will be available at a URL like <code>https://mindfulai.onrender.com</code>.</p>
+
+    <h2>Verifying the Deployment</h2>
+    <ol>
+        <li>Once deployed, visit your Render app URL</li>
+        <li>Create a new account using the registration page</li>
+        <li>Log in and test the chatbot functionality</li>
+        <li>Verify that:
+            <ul>
+                <li>User registration and login work correctly</li>
+                <li>The chatbot responds to mental health queries</li>
+                <li>The conversation flow follows the structured approach (problem → conversation → root cause → solutions)</li>
+                <li>The UI is responsive on both mobile and desktop</li>
+            </ul>
+        </li>
+    </ol>
+
+    <h2>Troubleshooting</h2>
+    <ul>
+        <li>If the application fails to start, check the Render logs for errors</li>
+        <li>If database connection fails, verify your DATABASE_URL and Supabase credentials</li>
+        <li>If the AI responses don't work, check that your GITHUB_TOKEN is valid and has the correct permissions</li>
+    </ul>
+
+    <h2>How the Application Works</h2>
+    <ol>
+        <li><strong>User Authentication</strong>:
+            <ul>
+                <li>Users register with a unique user ID, name, email, and password</li>
+                <li>Passwords are securely hashed before storage in Supabase</li>
+                <li>Sessions are maintained using Flask's session management</li>
+            </ul>
+        </li>
+        <li><strong>Conversation Flow</strong>:
+            <ul>
+                <li>The chatbot first asks about the user's specific mental health issue</li>
+                <li>It follows up with targeted questions to understand contributing factors</li>
+                <li>Through careful questioning, it identifies the underlying root cause</li>
+                <li>Finally, it provides actionable solutions tailored to address that root cause</li>
+            </ul>
+        </li>
+        <li><strong>Technical Architecture</strong>:
+            <ul>
+                <li><strong>Frontend</strong>: HTML/CSS/JS with responsive design</li>
+                <li><strong>Backend</strong>: Flask Python application</li>
+                <li><strong>Database</strong>: Supabase PostgreSQL (stores user data only)</li>
+                <li><strong>AI</strong>: GitHub LLaMA model via API</li>
+                <li><strong>Deployment</strong>: Render web service</li>
+            </ul>
+        </li>
+    </ol>
+
+    <h2>Maintenance Recommendations</h2>
+    <ol>
+        <li>Regularly backup your Supabase database</li>
+        <li>Monitor your Render service for any performance issues</li>
+        <li>Keep your dependencies updated for security patches</li>
+        <li>Consider implementing a more sophisticated session management system for scaling</li>
+    </ol>
+
+    <h2>Resources</h2>
+    <ul>
+        <li><a href="https://render.com/docs">Render Documentation</a></li>
+        <li><a href="https://supabase.com/docs">Supabase Documentation</a></li>
+        <li><a href="https://flask.palletsprojects.com/">Flask Documentation</a></li>
+        <li><a href="https://models.github.com/docs">GitHub LLaMA Documentation</a></li>
+    </ul>
+</body>
+</html>

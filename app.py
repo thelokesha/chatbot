@@ -5,11 +5,11 @@ from flask_cors import CORS
 import uuid 
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.middleware.proxy_fix import ProxyFix
-from llama_client import get_ai_response
+from llama_client import get_ai_response  # Make sure you have the llama_client module set up
 from supabase import create_client
 from dotenv import load_dotenv
 
-# Load environment variables
+# Load environment variables from .env file
 load_dotenv()
 
 # Configure logging
@@ -28,7 +28,7 @@ else:
 
 # Flask app setup
 app = Flask(__name__)
-app.secret_key = os.getenv("SESSION_SECRET")
+app.secret_key = os.getenv("SESSION_SECRET")  # This should be a strong secret key
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 CORS(app)
 
@@ -189,4 +189,5 @@ def new_chat():
     return jsonify({'success': True, 'session_id': new_chat_id})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    # Ensure the app runs with Gunicorn if deployed (recommended for production)
+    app.run(host='0.0.0.0', port=int(os.getenv("PORT", 5000)), debug=True)

@@ -16,8 +16,8 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 # Initialize Supabase client
-supabase_url = os.environ.get("https://qjlveevoebvgxfzmsbzj.supabase.co")
-supabase_key = os.environ.get("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFqbHZlZXZvZWJ2Z3hmem1zYnpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY3NzM4NjYsImV4cCI6MjA2MjM0OTg2Nn0.JU-AU7U7hQQ-ccv2_xkgkcRiARbuor39Dw2ztQbhiC4")
+supabase_url = os.environ.get("SUPABASE_URL")
+supabase_key = os.environ.get("SUPABASE_KEY")
 supabase = create_client(supabase_url, supabase_key) if supabase_url and supabase_key else None
 
 if supabase:

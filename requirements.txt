@@ -10,3 +10,5 @@ requests
 sqlalchemy
 supabase
 werkzeug
+python-dotenv
+

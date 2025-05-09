@@ -11,4 +11,5 @@ sqlalchemy
 supabase
 werkzeug
 python-dotenv
+llama_client
 
